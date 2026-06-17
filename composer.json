@@ -1,0 +1,35 @@
+{
+    "name": "pyncer/snyppet-organization",
+    "type": "library",
+    "description": "Pyncer snyppet for grouping users under an organization.",
+    "homepage": "https://pyncer.com/snyppet/organization",
+    "license": "Unlicense",
+    "require": {
+        "php": ">=8.1",
+        "psr/http-message": "^2.0",
+        "pyncer/app": "^1.2.0",
+        "pyncer/component": "^1.0.1",
+        "pyncer/data": "^1.0.1",
+        "pyncer/database": "^1.0.1",
+        "pyncer/http": "^1.0.3",
+        "pyncer/snyppet": "^1.1.0",
+        "pyncer/snyppet-access": "^1.0.0",
+        "pyncer/snyppet-role": "^1.0.0",
+        "pyncer/validation": "^1.1.0"
+    },
+    "autoload": {
+        "files": ["src/autoload.php"],
+        "psr-4": {
+            "Pyncer\\Snyppet\\Organization\\": "src/"
+        }
+    },
+    "support": {
+        "issues": "https://github.com/pyncerrc/pyncer-snyppet-organization/issues",
+        "source": "https://github.com/pyncerrc/pyncer-snyppet-organization"
+    },
+    "extra" : {
+        "branch-alias" : {
+            "dev-main" : "1.0-dev"
+        }
+    }
+}
