@@ -1,10 +1,10 @@
 <?php
 namespace Pyncer\Snyppet\Organization\Table\Organization;
 
-use Pyncer\Snyppet\Organization\Table\Organization\ValueModel;
 use Pyncer\Data\Mapper\AbstractMapper;
 use Pyncer\Data\Model\ModelInterface;
 use Pyncer\Data\Mapper\MapperResultInterface;
+use Pyncer\Snyppet\Organization\Table\Organization\ValueModel;
 
 class ValueMapper extends AbstractMapper
 {

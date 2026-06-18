@@ -104,8 +104,8 @@ class OrganizationMapperQuery extends AbstractRequestMapperQuery
     protected function isValidOption(string $option): bool
     {
         switch ($option) {
-            case 'include-user-data':
-            case 'include-user-values':
+            case 'include-organization-data':
+            case 'include-organization-values':
                 return true;
         }
 

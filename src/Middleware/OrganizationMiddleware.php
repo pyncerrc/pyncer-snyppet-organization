@@ -16,10 +16,10 @@ use Pyncer\Snyppet\Organization\Initializer;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationMapper;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationMapperQuery;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationModel;
-use Pyncer\Snyppet\Organization\Table\Organization\DataManager as UserDataManager;
+use Pyncer\Snyppet\Organization\Table\Organization\DataManager as OrganizationDataManager;
 use Pyncer\Snyppet\Organization\Table\Organization\User\UserMapper as OrganizationUserMapper;
 use Pyncer\Snyppet\Organization\Table\Organization\User\UserModel as OrganizationUserModel;
-use Pyncer\Snyppet\Organization\Table\Organization\ValueManager as UserValueManager;
+use Pyncer\Snyppet\Organization\Table\Organization\ValueManager as OrganizationValueManager;
 use Pyncer\Snyppet\Role\RoleManager;
 
 use const Pyncer\Snyppet\Organization\INITIALIZER as PYNCER_ORGANIZATION_INITIALIZER;
@@ -32,7 +32,7 @@ use const Pyncer\Snyppet\Organization\INITIALIZER_QUERY_PARAM_ID as PYNCER_ORGAN
 use const Pyncer\Snyppet\Organization\INITIALIZER_QUERY_PARAM_UID as PYNCER_ORGANIZATION_INITIALIZER_QUERY_PARAM_UID;
 use const Pyncer\Snyppet\Organization\INITIALIZER_QUERY_PARAM_ALIAS as PYNCER_ORGANIZATION_INITIALIZER_QUERY_PARAM_ALIAS;
 
-use const Pyncer\Snyppet\Organization\AUTO_INSERT
+use const Pyncer\Snyppet\Organization\AUTO_INSERT as PYNCER_ORGANIZATION_AUTO_INSERT;
 
 class OrganizationMiddleware implements MiddlewareInterface
 {
@@ -117,7 +117,7 @@ class OrganizationMiddleware implements MiddlewareInterface
                 break;
             case Initializer::QUERY_PARAM_ID:
                 $query = $request->getQueryParams();
-                $id = intval($query[PYNCER_ORGANIZATION_INITIALIZER_HEADER_ID] ?? 0);
+                $id = intval($query[PYNCER_ORGANIZATION_INITIALIZER_QUERY_PARAM_ID] ?? 0);
                 $organizationModel = $this->getOrganizationModelFromId(
                     $connection,
                     $access->getUserId(),
@@ -126,7 +126,7 @@ class OrganizationMiddleware implements MiddlewareInterface
                 break;
             case Initializer::QUERY_PARAM_UID:
                 $query = $request->getQueryParams();
-                $uid = strval($query[PYNCER_ORGANIZATION_INITIALIZER_HEADER_UID] ?? '');
+                $uid = strval($query[PYNCER_ORGANIZATION_INITIALIZER_QUERY_PARAM_UID] ?? '');
                 $organizationModel = $this->getOrganizationModelFromUid(
                     $connection,
                     $access->getUserId(),
@@ -135,7 +135,7 @@ class OrganizationMiddleware implements MiddlewareInterface
                 break;
             case Initializer::QUERY_PARAM_ALIAS:
                 $query = $request->getQueryParams();
-                $alias = strval($query[PYNCER_ORGANIZATION_INITIALIZER_HEADER_ALIAS] ?? '');
+                $alias = strval($query[PYNCER_ORGANIZATION_INITIALIZER_QUERY_PARAM_ALIAS] ?? '');
                 $organizationModel = $this->getOrganizationModelFromAlias(
                     $connection,
                     $access->getUserId(),
@@ -151,7 +151,7 @@ class OrganizationMiddleware implements MiddlewareInterface
         $organizationUserModel = $this->getOrganizationUserModel(
             $connection,
             $organizationModel,
-            $userId,
+            $access->getUserId(),
         );
 
         if ($organizationUserModel === null) {
@@ -192,7 +192,7 @@ class OrganizationMiddleware implements MiddlewareInterface
         ConnectionInterface $connection,
         int $userId,
         TokenModel $tokenModel,
-    ): ?OrganizatoinModel
+    ): ?OrganizationModel
     {
         if ($tokenModel->getScheme() !== PYNCER_ORGANIZATION_INITIALIZER_TOKEN_SCHEME ||
             $tokenModel->getRealm() !== PYNCER_ORGANIZATION_INITIALIZER_TOKEN_REALM
@@ -212,8 +212,9 @@ class OrganizationMiddleware implements MiddlewareInterface
 
     private function getOrganizationModelFromId(
         ConnectionInterface $connection,
-        int $organizationId
-    ): ?OrganizatoinModel
+        int $userId,
+        int $organizationId,
+    ): ?OrganizationModel
     {
         if ($organizationId === 0) {
             return null;
@@ -231,8 +232,9 @@ class OrganizationMiddleware implements MiddlewareInterface
 
     private function getOrganizationModelFromUid(
         ConnectionInterface $connection,
-        string $organizationUid
-    ): ?OrganizatoinModel
+        int $userId,
+        string $organizationUid,
+    ): ?OrganizationModel
     {
         $organizationUid = trim($organizationUid);
         if ($organizationUid === '') {
@@ -251,9 +253,9 @@ class OrganizationMiddleware implements MiddlewareInterface
 
     private function getOrganizationModelFromAlias(
         ConnectionInterface $connection,
-        string $organizationAlias,
         int $userId,
-    ): ?OrganizatoinModel
+        string $organizationAlias,
+    ): ?OrganizationModel
     {
         $organizationAlias = trim($organizationAlias);
         if ($organizationAlias === '') {
@@ -287,13 +289,10 @@ class OrganizationMiddleware implements MiddlewareInterface
     {
         $mapper = new OrganizationUserMapper($connection);
 
-        $model = $mapper->selectByColumns(
-            [
-                'organization_id' => $organizationModel->getId(),
-                'user_id' => $userId,
-            ],
-            $mapperQuery
-        );
+        $model = $mapper->selectByColumns([
+            'organization_id' => $organizationModel->getId(),
+            'user_id' => $userId,
+        ]);
 
         if ($model !== null) {
             if ($model->getPending() || !$model->getEnabled()) {
@@ -307,6 +306,10 @@ class OrganizationMiddleware implements MiddlewareInterface
             return null;
         }
 
+        if (!PYNCER_ORGANIZATION_AUTO_INSERT) {
+            return null;
+        }
+
         // Automatically insert organization user for owner
         $userName = $connection->select('user')
             ->columns('name')
@@ -314,7 +317,7 @@ class OrganizationMiddleware implements MiddlewareInterface
             ->value();
 
         $model = new OrganizationUserModel([
-            'organizatoin_id' => $organizationModel->getId(),
+            'organization_id' => $organizationModel->getId(),
             'user_id' => $organizationModel->getUserId(),
             'group' => 'super',
             'name' => $userName,
@@ -341,22 +344,31 @@ class OrganizationMiddleware implements MiddlewareInterface
             ->compare('deleted', false)
             ->compare(['organization__user__role', 'user_id'], $organizationUserModel->getUserId());
 
+        $roles = [];
+
         switch ($organizationUserModel->getGroup()) {
+            case UserGroup::SUPER:
+                $roles[] = 'organization_super';
+                $roles[] = 'organization_admin';
+                $roles[] = 'organization_user';
+                break;
             case UserGroup::ADMIN:
                 $where->compare('group', 'super', '!=');
+                $roles[] = 'organization_admin';
+                $roles[] = 'organization_user';
                 break;
             case UserGroup::USER:
                 $where->compare('group', 'super', '!=');
                 $where->compare('group', 'admin', '!=');
+                $roles[] = 'organization_user';
                 break;
             case UserGroup::GUEST:
                 $where->compare('group', 'guest');
+                $roles[] = 'organization_guest';
                 break;
         }
 
         $result = $query->execute();
-
-        $roles = [];
 
         while ($row = $this->connection->fetch($result)) {
             $roles[] = $row['alias'];

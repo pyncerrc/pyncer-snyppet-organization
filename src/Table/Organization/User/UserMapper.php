@@ -28,4 +28,32 @@ class UserMapper extends AbstractMapper
     {
         return ($mapperQuery instanceof UserMapperQuery);
     }
+
+    public function selectByUid(
+        string $uid,
+        ?MapperQueryInterface $mapperQuery = null,
+    ): ?ModelInterface
+    {
+        return $this->selectByColumns(
+            [
+                'uid' => $uid,
+            ],
+            $mapperQuery
+        );
+    }
+
+    public function selectByUserId(
+        int $organizationId,
+        int $userId,
+        ?MapperQueryInterface $mapperQuery = null,
+    ): ?ModelInterface
+    {
+        return $this->selectByColumns(
+            [
+                'organization_id' => $organizationId,
+                'user_id' => $userId,
+            ],
+            $mapperQuery
+        );
+    }
 }

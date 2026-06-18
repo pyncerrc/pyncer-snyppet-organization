@@ -84,7 +84,7 @@ class OrganizationModel extends AbstractModel
     {
         return $this->get('alias');
     }
-    public function setName(?string $value): static
+    public function setAlias(?string $value): static
     {
         $this->set('alias', $this->nullify($value));
         return $this;

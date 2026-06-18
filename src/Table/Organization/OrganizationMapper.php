@@ -2,6 +2,7 @@
 namespace Pyncer\Snyppet\Organization\Table\Organization;
 
 use Pyncer\Data\Mapper\AbstractMapper;
+use Pyncer\Data\Mapper\MapperResultInterface;
 use Pyncer\Data\MapperQuery\MapperQueryInterface;
 use Pyncer\Data\Model\ModelInterface;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationModel;
