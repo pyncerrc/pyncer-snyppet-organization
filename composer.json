@@ -14,7 +14,6 @@
         "pyncer/http": "^1.0.3",
         "pyncer/snyppet": "^1.1.0",
         "pyncer/snyppet-access": "^1.0.0",
-        "pyncer/snyppet-role": "^1.0.0",
         "pyncer/validation": "^1.1.0"
     },
     "autoload": {

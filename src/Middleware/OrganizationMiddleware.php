@@ -158,16 +158,13 @@ class OrganizationMiddleware implements MiddlewareInterface
             return $handler->next($request, $response);
         }
 
-        if ($handler->has(ID::role())) {
-            $roleManager = $handler->get(ID::role());
-            if ($roleManager instanceof RoleManager) {
-                $roles = $this->getRoles(
-                    $connection,
-                    $organizationUserModel,
-                );
+        if ($this->canAddRoles($handler)) {
+            $roles = $this->getRoles(
+                $connection,
+                $organizationUserModel,
+            );
 
-                $roleManager->addRoles($roles);
-            }
+            $roleManager->addRoles($roles);
         }
 
         ID::register(ID::organization());
@@ -186,6 +183,29 @@ class OrganizationMiddleware implements MiddlewareInterface
         $handler->set(ID::organization('value'), $valueManager);
 
         return $handler->next($request, $response);
+    }
+
+    private function canAddRoles(RequestHandlerInterface $handler): bool
+    {
+        if (!$handler->has(ID::SNYPPET)) {
+            return false;
+        }
+
+        $snyppetManager = $handler->get(ID::SNYPPET);
+
+        if (!$snyppetManager->has('role') ||
+            !$handler->has(ID::role())
+        ) {
+            return false;
+        }
+
+        $roleManager = $handler->get(ID::role());
+
+        if (!($roleManager instanceof RoleManager)) {
+            return false;
+        }
+
+        return true;
     }
 
     protected function getOrganizationModelFromToken(

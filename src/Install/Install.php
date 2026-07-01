@@ -75,21 +75,6 @@ class Install extends AbstractInstall
                 ->updateAction(ReferentialAction::CASCADE)
             ->execute();
 
-        $this->connection->createTable('organization__user__role')
-            ->serial('id')
-            ->int('user_id', IntSize::BIG)->index()
-            ->int('role_id', IntSize::BIG)->index()
-            ->index('#unique', 'user_id', 'role_id')->unique()
-            ->foreignKey(null, 'user_id')
-                ->references('user', 'id')
-                ->deleteAction(ReferentialAction::CASCADE)
-                ->updateAction(ReferentialAction::CASCADE)
-            ->foreignKey(null, 'role_id')
-                ->references('role', 'id')
-                ->deleteAction(ReferentialAction::CASCADE)
-                ->updateAction(ReferentialAction::CASCADE)
-            ->execute();
-
         $this->connection->createTable('organization__token')
             ->serial('id')
             ->int('organization_id', IntSize::BIG)->index()
@@ -122,10 +107,6 @@ class Install extends AbstractInstall
             $this->connection->dropTable('organization__token');
         }
 
-        if ($this->connection->hasTable('organization__user__role')) {
-            $this->connection->dropTable('organization__user__role');
-        }
-
         if ($this->connection->hasTable('organization__user')) {
             $this->connection->dropTable('organization__user');
         }
@@ -141,7 +122,74 @@ class Install extends AbstractInstall
     {
         return [
             'access' => '*',
-            'role' => '*'
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasRelated(string $snyppetAlias): bool
+    {
+        switch ($snyppetAlias) {
+            case 'role':
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function safeInstallRelated(string $snyppetAlias): bool
+    {
+        switch ($snyppetAlias) {
+            case 'role':
+                return $this->installRole();
+        }
+
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function safeUninstallRelated(string $snyppetAlias): bool
+    {
+        switch ($snyppetAlias) {
+            case 'role':
+                return $this->uninstallRole();
+        }
+
+        return false;
+    }
+
+    protected function installRole(): bool
+    {
+        $this->connection->createTable('organization__user__role')
+            ->serial('id')
+            ->int('user_id', IntSize::BIG)->index()
+            ->int('role_id', IntSize::BIG)->index()
+            ->index('#unique', 'user_id', 'role_id')->unique()
+            ->foreignKey(null, 'user_id')
+                ->references('user', 'id')
+                ->deleteAction(ReferentialAction::CASCADE)
+                ->updateAction(ReferentialAction::CASCADE)
+            ->foreignKey(null, 'role_id')
+                ->references('role', 'id')
+                ->deleteAction(ReferentialAction::CASCADE)
+                ->updateAction(ReferentialAction::CASCADE)
+            ->execute();
+
+        return true;
+    }
+
+    protected function uninstallRole(): bool
+    {
+        if ($this->connection->hasTable('organization__user__role')) {
+            $this->connection->dropTable('organization__user__role');
+        }
+
+        return true;
     }
 }
