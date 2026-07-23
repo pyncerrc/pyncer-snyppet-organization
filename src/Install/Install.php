@@ -23,6 +23,10 @@ class Install extends AbstractInstall
             ->bool('enabled')->default(false)->index()
             ->bool('deleted')->default(false)->index()
             ->index('#unique', 'uid')->unique()
+            ->foreignKey(null, 'user_id')
+                ->references('user', 'id')
+                ->deleteAction(ReferentialAction::CASCADE)
+                ->updateAction(ReferentialAction::CASCADE)
             ->execute();
 
         $this->connection->createTable('organization__data')
