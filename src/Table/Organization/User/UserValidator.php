@@ -7,7 +7,6 @@ use Pyncer\Snyppet\Access\Table\User\UserMapper;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationMapper;
 use Pyncer\Validation\Rule\BoolRule;
 use Pyncer\Validation\Rule\DateTimeRule;
-use Pyncer\Validation\Rule\EmailRule;
 use Pyncer\Validation\Rule\EnumRule;
 use Pyncer\Validation\Rule\PhoneRule;
 use Pyncer\Validation\Rule\RequiredRule;
