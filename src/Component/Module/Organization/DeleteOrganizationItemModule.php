@@ -6,8 +6,10 @@ use Pyncer\Component\Module\AbstractDeleteItemModule;
 use Pyncer\Data\Mapper\MapperInterface;
 use Pyncer\Data\MapperQuery\MapperQueryInterface;
 use Pyncer\Data\Model\ModelInterface;
+use Pyncer\Database\Exception\QueryException;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationMapper;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationMapperQuery;
+use Pyncer\Snyppet\Utility\Component\SoftDeleteTrait;
 
 class DeleteOrganizationItemModule extends AbstractDeleteItemModule
 {
