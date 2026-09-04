@@ -355,14 +355,14 @@ class OrganizationMiddleware implements MiddlewareInterface
     ): array
     {
         $query = $this->connection->select('role')
-            ->columns('alias')
+            ->columns('alias', 'group')
             ->join('organization__user__role', 'role_id', 'id');
 
         $where = $query->getWhere();
 
         $where->compare('enabled', true)
             ->compare('deleted', false)
-            ->compare(['organization__user__role', 'user_id'], $organizationUserModel->getUserId());
+            ->compare(['organization__user__role', 'organization_user_id'], $organizationUserModel->getId());
 
         $roles = [];
 
@@ -391,6 +391,10 @@ class OrganizationMiddleware implements MiddlewareInterface
         $result = $query->execute();
 
         while ($row = $this->connection->fetch($result)) {
+            if (!in_array('organization_' . $row['group'], $roles)) {
+                continue;
+            }
+
             $roles[] = $row['alias'];
         }
 
