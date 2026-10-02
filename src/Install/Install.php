@@ -46,7 +46,7 @@ class Install extends AbstractInstall
             ->serial('id')
             ->int('organization_id', IntSize::BIG)->index()
             ->string('key', 50)->index()
-            ->string('value', 250)
+            ->string('value', 250)->index()
             ->bool('preload')->default(false)->index()
             ->index('#unique', 'organization_id', 'key')->unique()
             ->foreignKey(null, 'organization_id')
