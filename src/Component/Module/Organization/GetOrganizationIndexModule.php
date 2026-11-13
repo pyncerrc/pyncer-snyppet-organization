@@ -7,7 +7,6 @@ use Pyncer\Data\Mapper\MapperInterface;
 use Pyncer\Data\MapperQuery\MapperQueryInterface;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationMapper;
 use Pyncer\Snyppet\Organization\Table\Organization\OrganizationMapperQuery;
-use Pyncer\Snyppet\Organization\Table\Organization\OrganizationModel;
 
 class GetOrganizationIndexModule extends AbstractGetIndexModule
 {
